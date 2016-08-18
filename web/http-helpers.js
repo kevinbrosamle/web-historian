@@ -10,12 +10,48 @@ exports.headers = {
   'Content-Type': 'text/html'
 };
 
-exports.serveAssets = function(res, asset, callback) {
+exports.sendGetResponse = function(response, data, statusCode) {
+  response.writeHead(statusCode, exports.headers);
+  response.end(data);
+};
+
+exports.sendPostResponse = function(response, data) {
+  response.writeHead(201, exports.headers);
+  response.end(data);
+};
+
+exports.serveAssets = function(response, asset, callback) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...),
   // css, or anything that doesn't change often.)
+  fs.readFile(asset, function read(err, data) {
+    if (err) {
+      throw err;
+    }
+
+    callback(response, data);
+  });
+
 };
 
+exports.collectData = function(request, callback, response) {
+  var data = '';
+  request.on('data', function(chunk) {
+    data += chunk;
+  });
+  request.on('end', function() {
+    callback(response, data);
+  });
+};
 
-
+exports.makeActionHandler = function(actionMap) {
+  return function(request, response) {
+    var action = actionMap[request.method];
+    if (action) {
+      action(request, response);
+    } else {
+      exports.sendResponse(response, '', 404);
+    }
+  };
+};
 // As you progress, keep thinking about what helper functions you can put here!
