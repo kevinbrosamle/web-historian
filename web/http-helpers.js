@@ -11,12 +11,14 @@ exports.headers = {
 };
 
 exports.sendGetResponse = function(response, data, statusCode) {
+  statusCode = statusCode || 200;
   response.writeHead(statusCode, exports.headers);
   response.end(data);
 };
 
 exports.sendPostResponse = function(response, data) {
-  response.writeHead(201, exports.headers);
+  response.writeHead(302, exports.headers);
+  // console.log('in here');
   response.end(data);
 };
 
@@ -28,19 +30,25 @@ exports.serveAssets = function(response, asset, callback) {
     if (err) {
       throw err;
     }
-
     callback(response, data);
   });
 
 };
 
-exports.collectData = function(request, callback, response) {
+exports.collectData = function(request, response, callback) {
   var data = '';
   request.on('data', function(chunk) {
     data += chunk;
   });
+  console.log(callback);
   request.on('end', function() {
-    callback(response, data);
+    // console.log(data, 'this is the data');
+    if (data.slice(0, 3) === 'url') {
+      callback(data.slice(4));
+    } else {
+      callback(data);
+    }
+    exports.sendPostResponse(response, data);
   });
 };
 

@@ -38,7 +38,7 @@ describe('server', function() {
 
         // Write data to the file.
         fs.writeFileSync(fixturePath, 'google');
-
+        // console.log(request.url, 'request.url of test');
         request
           .get('/' + fixtureName)
           .expect(200, /google/, function (err) {
